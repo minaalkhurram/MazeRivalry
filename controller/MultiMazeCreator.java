@@ -212,7 +212,7 @@ public class MultiMazeCreator
     /*check win case: player in exit*/
     public boolean win()
     {
-        if(player.equals(exit))
+        if(player.equals(exit) || player2.equals(exit))
             return true;
         return false;
     }
