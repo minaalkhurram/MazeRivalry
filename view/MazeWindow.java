@@ -96,44 +96,6 @@ public class MazeWindow extends JPanel
 
 
 
-
-//    public void paintMaze(Graphics2D g2) {
-//        /*LOOP THROUGH MAZE 2D ARRAY*/
-//        for (int y = 0; y < maze.length; y++) {
-//            for (int x = 0; x < maze[0].length; x++) {
-//                /*DETERMINE COLOR*/
-//                if (player.getY() == y && player.getX() == x) // player
-//                    g2.drawImage(playerImage, (int) (x * (500.0 / width)), (int) (y * (500.0 / height)),
-//                            (int) (500.0 / width), (int) (500.0 / height), null);
-//                else if (exit.getY() == y && exit.getX() == x) // exit
-//                    g2.drawImage(checkpoint, (int) (x * (500.0 / width)), (int) (y * (500.0 / height)),
-//                            (int) (500.0 / width), (int) (500.0 / height), null);
-//                else if (maze[x][y] == WALL) // wall
-//                    g2.drawImage(wallImage, (int) (x * (500.0 / width)), (int) (y * (500.0 / height)),
-//                            (int) (500.0 / width), (int) (500.0 / height), null);
-//                else if (flashlightMode && isDark(x, y)) { // darkness
-//                    //g2.setPaint(Color.black);
-//                    // Fill the grid cell for darkness
-//                    g2.fill(new Rectangle2D.Double(x * (500.0 / width), y * (500.0 / height),
-//                            (500.0 / width), (500.0 / height)));
-//                } else { // cell
-//                    g2.setPaint(Color.black);
-//                    // Fill the grid cell
-//                    g2.fill(new Rectangle2D.Double(x * (500.0 / width), y * (500.0 / height),
-//                            (500.0 / width), (500.0 / height)));
-//                }
-//            }
-//        }
-//    }
-
-//    private boolean isDark(int x, int y) {
-//        int distance = (int) Math.sqrt(Math.pow(player.getX() - x, 2) + Math.pow(player.getY() - y, 2));
-//        return distance > 3; // Adjust the distance as needed
-//    }
-
-
-
-
     public void setOriginalMode()
     {
         flashlightMode=false;
