@@ -1,33 +1,46 @@
 package view;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.*;
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.SQLException;
 import java.util.*;
-import javax.swing.BorderFactory;
 import java.awt.geom.Ellipse2D;
+import java.io.File;
+
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.ImageIcon;
 
+import controller.DbConnection;
 import controller.MazeCreator;
+import controller.MultiMazeCreator;
+import view.MainClass;
 
 
 public class MazeGUI extends JPanel implements ActionListener, KeyListener
 {
     //Buttons and LAbels
-    private JLabel title,levelBoard;
+    private JLabel title,levelBoard,scores;
     private MazeWindow mazeDisplay;
+
     private MazeCreator mazeBuilder;
+
     private int width, height;
-    private JButton flashlightMode, originalMode, increaseSize, decreaseSize,reset;
+    private JButton flashlightMode, originalMode, increaseSize, decreaseSize,reset, pause, sound;
     private int level;
-    
-    public static void main(String[] args)
-    {
-        new MazeGUI();
+    private Clip clip;
+    // private ImageIcon music;
+    private String playerName;
+
+    public MazeGUI() throws SQLException {
+        this.MazeGraphics();
+
     }
-    
-    public MazeGUI()
-    {
+
+    public void MazeGraphics() throws SQLException {
         /*initialize game variables*/
         level=1;
         width=level*5;
@@ -47,23 +60,29 @@ public class MazeGUI extends JPanel implements ActionListener, KeyListener
         /*SIDE BAR PANEL - buttons and level tracker*/
         JPanel sideBar=new JPanel();
         sideBar.setBackground(new Color(0,0,0));
-        sideBar.setLayout(new GridLayout(4,1));
+        sideBar.setLayout(new GridLayout(5,1));
+        scores=new JLabel("Score: "+Integer.toString( MainClass.dbCON.getScore(MainClass.names[0])), SwingConstants.CENTER);
+        scores.setFont(new Font("Times Roman", Font.PLAIN, 24));
+        scores.setForeground(Color.CYAN);
         levelBoard=new JLabel("LEVEL: " + level, SwingConstants.CENTER);
         levelBoard.setFont(new Font("Times Roman", Font.PLAIN, 24));
         levelBoard.setForeground(Color.GREEN);
         sideBar.add(levelBoard);
-        flashlightMode=new JButton("Flashlight Mode");
-        flashlightMode.setFocusable(false);
-        flashlightMode.addActionListener(this);
-        sideBar.add(flashlightMode);
-        originalMode=new JButton("Original Mode");
-        originalMode.setFocusable(false);
-        originalMode.addActionListener(this);
-        sideBar.add(originalMode);
+        sideBar.add(scores);
+    
+        
+        pause=new JButton("Pause");
+        pause.setFocusable(false);
+        pause.addActionListener(this);
+        sideBar.add(pause);
         reset=new JButton("Restart");
         reset.setFocusable(false);
         reset.addActionListener(this);
         sideBar.add(reset);
+            sound=new JButton("Sound");
+       sound.setFocusable(false);
+        sound.addActionListener(this);
+        sideBar.add(sound);
         
         /*MAZE DISPLAY - holds MazeWindow*/
         JPanel mazePanel = new JPanel();
@@ -97,11 +116,6 @@ public class MazeGUI extends JPanel implements ActionListener, KeyListener
     public void actionPerformed(ActionEvent e)
     {
         /*BUTTON LISTENERS*/
-        if(e.getSource() == originalMode)
-            mazeDisplay.setOriginalMode();
-        
-        if(e.getSource() == flashlightMode)
-            mazeDisplay.setFlashlightMode();
         
         if(e.getSource() == reset)
         {
@@ -113,6 +127,25 @@ public class MazeGUI extends JPanel implements ActionListener, KeyListener
             mazeBuilder.createMaze();
             mazeDisplay.setPoints(mazeBuilder.getMaze(),mazeBuilder.getPlayerPos(),mazeBuilder.getExit());
         }
+        if(e.getSource()==sound){
+            playMusic();
+        }
+    }
+    private void playMusic(){
+   if(clip != null && clip.isRunning()){
+    clip.stop();
+   }
+   try{
+    //change the path according to your need
+      File file= new File("D:\\Documents\\SCD Project\\MazeRivalry\\view\\music.wav");
+      AudioInputStream audioin= AudioSystem.getAudioInputStream(file);
+      clip= AudioSystem.getClip();
+      clip.open(audioin);
+      clip.start();
+
+   }catch(Exception e ){
+    System.out.println(e);
+   }
     }
     
     public void keyTyped(KeyEvent e) {}
@@ -137,7 +170,17 @@ public class MazeGUI extends JPanel implements ActionListener, KeyListener
         if(mazeBuilder.win())
         {
             level++;
+            try {
+                MainClass.dbCON.setScore(MainClass.names[0]);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             levelBoard.setText("LEVEL: " + level);
+            try {
+                scores.setText("Score: "+Integer.toString( MainClass.dbCON.getScore(MainClass.names[0])));
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             width=level*5;
             height=level*5;
             mazeBuilder=new MazeCreator(width,height);

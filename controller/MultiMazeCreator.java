@@ -17,6 +17,8 @@ public class MultiMazeCreator
     Point player;
     Point player2;
 
+    public boolean winPlayer; //1 for player one and 0 for player 2
+
     public MultiMazeCreator(int width, int height)
     {
         this.width=width;
@@ -212,8 +214,13 @@ public class MultiMazeCreator
     /*check win case: player in exit*/
     public boolean win()
     {
-        if(player.equals(exit))
-            return true;
+        if(player.equals(exit) ||player2.equals(exit)){
+            if(player.equals(exit))
+                winPlayer=true;
+            else
+                winPlayer=false;
+
+            return true;}
         return false;
     }
 

@@ -1,30 +1,23 @@
 package view;
-
-
+import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
-import javax.swing.BorderFactory;
-import java.awt.geom.Ellipse2D;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyAdapter;
-
+import java.sql.SQLException;
+import java.io.File;
 import controller.MultiMazeCreator;
-
 
 
 public class MultiMazeGui extends JPanel implements ActionListener, KeyListener
 {
-    //Buttons and LAbels
-    private JLabel title,levelBoard;
+    //Buttons and Labels
+    private JLabel title,levelBoard,player1,player2;
     private MultiMazeWindow mazeDisplay;
     private MultiMazeCreator mazeBuilder;
     private int width, height;
-    private JButton flashlightMode, originalMode, increaseSize, decreaseSize,reset;
+    private JButton flashlightMode, originalMode, increaseSize, decreaseSize,reset, pause, sound;;
     private int level;
+    private Clip clip;
 
     public static void main(String[] args)
     {
@@ -45,26 +38,44 @@ public class MultiMazeGui extends JPanel implements ActionListener, KeyListener
         window.setBackground(new Color(0,0,0));
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setTitle("Maze Runner Interface");
-        window.setSize(655,620);
+        window.setSize(680,620);
         window.setLocationRelativeTo(null);
         window.setResizable(false);
-
+        
         /*SIDE BAR PANEL - buttons and level tracker*/
         JPanel sideBar=new JPanel();
+        sideBar.setSize(10,600);
         sideBar.setBackground(new Color(0,0,0));
-        sideBar.setLayout(new GridLayout(4,1));
+        sideBar.setLayout(new GridLayout(6,1));
         levelBoard=new JLabel("LEVEL: " + level, SwingConstants.CENTER);
         levelBoard.setFont(new Font("Times Roman", Font.PLAIN, 24));
+        try {
+            player1=new JLabel(MainClass.names[0]+" Score: "+Integer.toString( MainClass.dbCON.getScore(MainClass.names[0])), SwingConstants.CENTER);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        player1.setFont(new Font("Times Roman", Font.PLAIN, 20));
+        player1.setForeground(Color.CYAN);
+        try {
+            player2=new JLabel(MainClass.names[1]+" Score: "+Integer.toString( MainClass.dbCON.getScore(MainClass.names[1])), SwingConstants.CENTER);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        player2.setFont(new Font("Times Roman", Font.PLAIN, 20));
+        player2.setForeground(Color.CYAN);
         levelBoard.setForeground(Color.GREEN);
         sideBar.add(levelBoard);
-        flashlightMode=new JButton("Flashlight Mode");
-        flashlightMode.setFocusable(false);
-        flashlightMode.addActionListener(this);
-        sideBar.add(flashlightMode);
-        originalMode=new JButton("Original Mode");
-        originalMode.setFocusable(false);
-        originalMode.addActionListener(this);
-        sideBar.add(originalMode);
+         sideBar.add(player1);
+        sideBar.add(player2);
+        sound=new JButton("Sound");
+        sound.setFocusable(false);
+        sound.addActionListener(this);
+        sideBar.add(sound);
+        
+        pause=new JButton("Pause");
+        pause.setFocusable(false);
+        pause.addActionListener(this);
+        sideBar.add(pause);
         reset=new JButton("Restart");
         reset.setFocusable(false);
         reset.addActionListener(this);
@@ -76,7 +87,7 @@ public class MultiMazeGui extends JPanel implements ActionListener, KeyListener
         mazePanel.setBackground(new Color(0,0,0));
         mazeDisplay = new MultiMazeWindow(mazeBuilder.getMaze(),mazeBuilder.getPlayerPos(),mazeBuilder.getPlayer2Pos(),mazeBuilder.getExit());
         mazePanel.add(mazeDisplay);
-
+        mazeDisplay.setPreferredSize(new Dimension(1000, 400));
         /*TITLE PANEL*/
         JPanel titleBar = new JPanel();
         titleBar.setBackground(new Color(0,0,0));
@@ -87,7 +98,7 @@ public class MultiMazeGui extends JPanel implements ActionListener, KeyListener
 
         /*CREATE MAIN PANEL (borderlayout) and ADD CHILDREN PANELS*/
         JPanel userInterface = new JPanel();
-        userInterface.setLayout(new BorderLayout(20,10));
+        userInterface.setLayout(new BorderLayout(10,10));
         userInterface.setBackground(new Color(0,0,0));
         userInterface.add(mazeDisplay, BorderLayout.CENTER);
         userInterface.add(titleBar, BorderLayout.NORTH);
@@ -101,13 +112,10 @@ public class MultiMazeGui extends JPanel implements ActionListener, KeyListener
 
     public void actionPerformed(ActionEvent e)
     {
-        /*BUTTON LISTENERS*/
-        if(e.getSource() == originalMode)
-            mazeDisplay.setOriginalMode();
 
-        if(e.getSource() == flashlightMode)
-            mazeDisplay.setFlashlightMode();
-
+         if(e.getSource()==sound){
+           playMusic();
+       }
         if(e.getSource() == reset)
         {
             level=1;
@@ -119,7 +127,22 @@ public class MultiMazeGui extends JPanel implements ActionListener, KeyListener
             mazeDisplay.setPoints(mazeBuilder.getMaze(),mazeBuilder.getPlayerPos(),mazeBuilder.getPlayer2Pos(),mazeBuilder.getExit());
         }
     }
+    private void playMusic(){
+  if(clip != null && clip.isRunning()){
+   clip.stop();
+  }
+  try{
+   //change the path according to your need
+     File file= new File("/Users/aizakhurram/SCD Project/MazeRivalry/view/music.wav");
+     AudioInputStream audioin= AudioSystem.getAudioInputStream(file);
+     clip= AudioSystem.getClip();
+     clip.open(audioin);
+     clip.start();
 
+  }catch(Exception e ){
+   System.out.println(e);
+  }
+   }
     public void keyTyped(KeyEvent e) {}
 
     public void keyPressed(KeyEvent e) {}
@@ -151,10 +174,22 @@ public class MultiMazeGui extends JPanel implements ActionListener, KeyListener
         mazeDisplay.setPlayer(mazeBuilder.getPlayerPos());
         mazeDisplay.setPlayer2(mazeBuilder.getPlayer2Pos());
 
-       
+
         /*MAZE BUILDER*/
         if(mazeBuilder.win())
         {
+
+            try {
+                if(mazeBuilder.winPlayer==true)//means player 1 won
+                MainClass.dbCON.setScore(MainClass.names[0]);
+                else
+                    MainClass.dbCON.setScore(MainClass.names[1]);
+
+                player1.setText(MainClass.names[0]+" Score: "+Integer.toString( MainClass.dbCON.getScore(MainClass.names[0])));
+                player2.setText(MainClass.names[1]+" Score: "+Integer.toString( MainClass.dbCON.getScore(MainClass.names[1])));
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             level++;
             levelBoard.setText("LEVEL: " + level);
             width=level*5;
@@ -163,5 +198,6 @@ public class MultiMazeGui extends JPanel implements ActionListener, KeyListener
             mazeBuilder.createMaze();
             mazeDisplay.setPoints(mazeBuilder.getMaze(),mazeBuilder.getPlayerPos(),mazeBuilder.getPlayerPos(),mazeBuilder.getExit());
         }
+
     }
 }

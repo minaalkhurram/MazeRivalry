@@ -1,12 +1,16 @@
 
 //changed for p2 except last function
 package view;
+import javax.imageio.ImageIO;
+import javax.sound.midi.Soundbank;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.*;
+import java.io.File;
+import java.io.IOException;
 import java.awt.event.*;
 import java.util.*;
-import javax.swing.BorderFactory;
+
 import javax.swing.border.Border;
 import java.awt.geom.*;
 import java.awt.geom.Rectangle2D.Double;
@@ -23,6 +27,13 @@ import java.awt.geom.Rectangle2D.Double;
         Point player,player2,exit;
         int height, width;
 
+
+
+           // Load images for the wall
+    private Image wallImage;
+    private Image playerImage;
+    private Image exitImage;
+    private Image player2Image;
         public MultiMazeWindow(boolean[][] maze, Point player,Point player2, Point exit)
         {
             height=maze.length;
@@ -32,8 +43,30 @@ import java.awt.geom.Rectangle2D.Double;
             this.player=player;
             this.player2=player2;
             flashlightMode=false;
+
+              try {
+            // Load the wall image (replace "wall_image.png" with the actual file name)
+                  wallImage = ImageIO.read(new File("D:\\Documents\\SCDPROJFINAL\\SCD Project\\MazeRivalry\\view\\grey_wall.png"));
+                 // System.out.println("Wall image loaded successfully");
+
+                  // Load the player image
+                  playerImage = ImageIO.read(new File("D:\\Documents\\SCDPROJFINAL\\SCD Project\\MazeRivalry\\view\\darkknight.gif"));
+                 // System.out.println("Player image loaded successfully");
+
+                  // Load the player2 image
+                  player2Image = ImageIO.read(new File("D:\\Documents\\SCDPROJFINAL\\SCD Project\\MazeRivalry\\view\\player2.png"));
+                //  System.out.println("Player2 image loaded successfully");
+
+                  // Load the exit image
+                  exitImage = ImageIO.read(new File("D:\\Documents\\SCDPROJFINAL\\SCD Project\\MazeRivalry\\view\\Checkpoint.png"));
+                 // System.out.println("Exit image loaded successfully");
+            
+        } catch (IOException e) {
+                  System.out.println("error with image");
+            e.printStackTrace();
         }
-        /*UPDATE DISPLAY WITH NEW INFORMATION*/
+        }
+      
         public void setPoints(boolean[][] maze, Point player,Point player2, Point exit)
         {
             height=maze.length;
@@ -55,33 +88,44 @@ import java.awt.geom.Rectangle2D.Double;
         }
 
         /*PAINT MAZE*/
-        public void paintMaze(Graphics2D g2)
-        {
+        public void paintMaze(Graphics2D g2) {
             /*LOOP THROUGH MAZE 2D ARRAY*/
-            for(int y = 0; y< maze.length; y++)
-            {
-                for(int x = 0; x<maze[0].length; x++)
-                {
+            for (int y = 0; y < maze.length; y++) {
+                for (int x = 0; x < maze[0].length; x++) {
                     /*DETERMINE COLOR*/
-                    if(player.getY()==y&&player.getX()==x) //player
-                        g2.setPaint(Color.YELLOW);
-                    else if(player2.getY()==y&&player2.getX()==x) //exit
-                        g2.setPaint(Color.PINK);
-                    else if(exit.getY()==y&&exit.getX()==x) //exit
-                        g2.setPaint(Color.RED);
-                    else if(maze[x][y]==WALL) //wall
-                        g2.setPaint(Color.BLACK);
-                    else if(flashlightMode&&(x>player.getX()+3||y>player.getY()+3||x<player.getX()-3||y<player.getY()-3)) //darkness
-                        g2.setPaint(Color.BLACK);
-                    else if(flashlightMode&&(x>player2.getX()+3||y>player2.getY()+3||x<player2.getX()-3||y<player2.getY()-3)) //darkness
-                        g2.setPaint(Color.BLACK);
-                    else //cell
-                        g2.setPaint(Color.WHITE);
-                    /*PAINT GRID CELL*/
-                    g2.fill(new Rectangle2D.Double(x*(500.0/width),y*(500.0/height),(500.0/width),(500.0/height)));
+                    if (player.getY() == y && player.getX() == x) // player
+                        g2.drawImage(playerImage, (int) (x * (500.0 / width)), (int) (y * (500.0 / height)),
+                                (int) (500.0 / width), (int) (500.0 / height), null);
+                    else if (exit.getY() == y && exit.getX() == x) //exit
+                    //g2.setPaint(Color.BLACK);
+                        g2.drawImage(exitImage, (int) (x * (500.0 / width)), (int) (y * (500.0 / height)),
+                                (int) (500.0 / width), (int) (500.0 / height), null);
+                    else if (player2.getY() == y && player2.getX() == x)
+                        g2.drawImage(player2Image, (int) (x * (500.0 / width)), (int) (y * (500.0 / height)),
+                                (int) (500.0 / width), (int) (500.0 / height), null);
+
+                    else if (maze[x][y] == WALL) // wall
+                        g2.drawImage(wallImage, (int) (x * (500.0 / width)), (int) (y * (500.0 / height)),
+                                (int) (500.0 / width), (int) (500.0 / height), null);
+                    else if (flashlightMode && (x > player.getX() + 3 || y > player.getY() + 3 || x < player.getX() - 3
+                            || y < player.getY() - 3)) { // darkness
+                        g2.setPaint(Color.black);
+                        // Fill the grid cell for darkness
+                        g2.fill(new Rectangle2D.Double(x * (500.0 / width), y * (500.0 / height),
+                                (500.0 / width), (500.0 / height)));
+                    } else { // cell
+                        g2.setPaint(Color.black);
+                        // Fill the grid cell
+                        g2.fill(new Rectangle2D.Double(x * (500.0 / width), y * (500.0 / height),
+                                (500.0 / width), (500.0 / height)));
+                    }
                 }
             }
         }
+
+
+
+
 
         public void setOriginalMode()
         {
@@ -89,11 +133,11 @@ import java.awt.geom.Rectangle2D.Double;
             repaint();
         }
 
-        public void setFlashlightMode()
-        {
-            flashlightMode=true;
-            repaint();
-        }
+        // public void setFlashlightMode()
+        // {
+        //     flashlightMode=true;
+        //     repaint();
+        // }
 
         public void setPlayer(Point player)
         {
@@ -105,6 +149,10 @@ import java.awt.geom.Rectangle2D.Double;
             this.player2=player2;
             repaint();
         }
+      /*  public static void main(String[] args)
+        {
+           new MultiMazeGui();
+        }*/
     }
 
 
