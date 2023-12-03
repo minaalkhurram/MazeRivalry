@@ -46,7 +46,7 @@ public class MultiMazeGui extends JPanel implements ActionListener, KeyListener
         JPanel sideBar=new JPanel();
         sideBar.setSize(10,600);
         sideBar.setBackground(new Color(0,0,0));
-        sideBar.setLayout(new GridLayout(6,1));
+        sideBar.setLayout(new GridLayout(5,1));
         levelBoard=new JLabel("LEVEL: " + level, SwingConstants.CENTER);
         levelBoard.setFont(new Font("Times Roman", Font.PLAIN, 24));
         try {
@@ -72,10 +72,10 @@ public class MultiMazeGui extends JPanel implements ActionListener, KeyListener
         sound.addActionListener(this);
         sideBar.add(sound);
         
-        pause=new JButton("Pause");
+      /*  pause=new JButton("Pause");
         pause.setFocusable(false);
         pause.addActionListener(this);
-        sideBar.add(pause);
+        sideBar.add(pause);*/
         reset=new JButton("Restart");
         reset.setFocusable(false);
         reset.addActionListener(this);
@@ -180,10 +180,13 @@ public class MultiMazeGui extends JPanel implements ActionListener, KeyListener
         {
 
             try {
-                if(mazeBuilder.winPlayer==true)//means player 1 won
+                if(mazeBuilder.winPlayer==true){//means player 1 won
                 MainClass.dbCON.setScore(MainClass.names[0]);
-                else
+                    this.WinDialog(MainClass.names[0]);
+                }
+                else{
                     MainClass.dbCON.setScore(MainClass.names[1]);
+                this.WinDialog(MainClass.names[1]);}
 
                 player1.setText(MainClass.names[0]+" Score: "+Integer.toString( MainClass.dbCON.getScore(MainClass.names[0])));
                 player2.setText(MainClass.names[1]+" Score: "+Integer.toString( MainClass.dbCON.getScore(MainClass.names[1])));
@@ -199,5 +202,18 @@ public class MultiMazeGui extends JPanel implements ActionListener, KeyListener
             mazeDisplay.setPoints(mazeBuilder.getMaze(),mazeBuilder.getPlayerPos(),mazeBuilder.getPlayerPos(),mazeBuilder.getExit());
         }
 
+
+    }
+    public void WinDialog(String name) {
+        JFrame instruction=new JFrame();
+        instruction.setTitle("Game Instructions");
+        instruction.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        instruction.setSize(300, 150);
+        instruction.setLocationRelativeTo(null);
+
+        JLabel label = new JLabel("<html><center> WOHOOOO "+name+" WON !!!</html>");
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        instruction.add(label);
+        instruction.setVisible(true);
     }
 }

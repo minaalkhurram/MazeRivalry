@@ -19,7 +19,7 @@ public class DbConnection {
         }
     }
 
-    public int enterPlayer(String playerName) {
+    public boolean enterPlayer(String playerName) {
         try {
             boolean exists = false;
             st.beforeFirst();
@@ -38,7 +38,7 @@ public class DbConnection {
                 st.moveToCurrentRow();
             }
 
-            return st.getRow();
+            return exists;
         } catch (SQLException e) {
             throw new RuntimeException("Error entering player", e);
         }
@@ -69,6 +69,18 @@ public class DbConnection {
             if (st.getString(1).equals(player)) {
                 int curr=st.getInt(2);
                 curr++;
+                st.updateInt(2,curr);
+                st.updateRow();
+
+                break; // No need to continue if the player is found
+            }
+        } while (st.next());
+    }
+    public void resetScore(String player) throws SQLException {
+        st.first();
+        do {
+            if (st.getString(1).equals(player)) {
+                int curr=0;
                 st.updateInt(2,curr);
                 st.updateRow();
 

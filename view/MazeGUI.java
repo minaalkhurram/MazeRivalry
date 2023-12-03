@@ -60,7 +60,7 @@ public class MazeGUI extends JPanel implements ActionListener, KeyListener
         /*SIDE BAR PANEL - buttons and level tracker*/
         JPanel sideBar=new JPanel();
         sideBar.setBackground(new Color(0,0,0));
-        sideBar.setLayout(new GridLayout(5,1));
+        sideBar.setLayout(new GridLayout(4,1));
         scores=new JLabel("Score: "+Integer.toString( MainClass.dbCON.getScore(MainClass.names[0])), SwingConstants.CENTER);
         scores.setFont(new Font("Times Roman", Font.PLAIN, 24));
         scores.setForeground(Color.CYAN);
@@ -71,10 +71,10 @@ public class MazeGUI extends JPanel implements ActionListener, KeyListener
         sideBar.add(scores);
     
         
-        pause=new JButton("Pause");
-        pause.setFocusable(false);
-        pause.addActionListener(this);
-        sideBar.add(pause);
+       // pause=new JButton("Pause");
+        //pause.setFocusable(false);
+        //pause.addActionListener(this);
+        //sideBar.add(pause);
         reset=new JButton("Restart");
         reset.setFocusable(false);
         reset.addActionListener(this);
